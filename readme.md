@@ -1,5 +1,13 @@
 This abomination is the work of Codex. The code is definitely not plesent to the eyes, at least it works lmao.
 
+<p align="center">
+  <img src="samples/index.png" alt="Control Panel Screenshot" width="600">
+</p>
+
+<p align="center">
+  <img src="samples/overlay_index.png" alt="Overlay Screenshot" width="600">
+</p>
+
 ### Quick Start
 
 1. **Install Node.js**  
