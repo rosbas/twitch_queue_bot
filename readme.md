@@ -8,7 +8,7 @@ This abomination is the work of Codex. The code is definitely not pleasant to th
   <img src="samples/overlay_index.png" alt="Overlay Screenshot" width="600">
 </p>
 
-### Quick Start
+### Quick Start (Setup)
 
 1. **Install Node.js**  
    Download and install the current LTS release from [nodejs.org](https://nodejs.org/). Restart your computer if the installer asks you to.
@@ -47,3 +47,11 @@ This abomination is the work of Codex. The code is definitely not pleasant to th
 
 7. **Stop the bot**  
    When you are done streaming, return to the terminal window and press `Ctrl + C` once. The queue settings are saved automatically between sessions.
+
+### Usage
+Once the credential is added, it should allow the code to read text from twitch chat in real-time.
+By putting the command !song follow text => 
+```
+"!song this_song_pls"
+```
+, it should be added into the queue automatically.
