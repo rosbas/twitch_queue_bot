@@ -1,0 +1,381 @@
+<!doctype html>
+<html class="h-full bg-transparent">
+<head>
+  <meta charset="utf-8" />
+  <title>Queue Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/js/tailwind-config.js"></script>
+</head>
+<body class="h-full bg-transparent font-semibold text-[20px] leading-snug text-white">
+  <main class="p-4">
+    <section id="overlayWrapper" style="width:560px" class="rounded-2xl bg-black/20 p-5 backdrop-blur-md drop-shadow-overlay">
+      <header class="mb-3">
+        <h1 class="text-2xl font-semibold text-accent">Next up</h1>
+      </header>
+
+      <div id="queueContainer" class="relative pr-6">
+        <ol id="list" class="space-y-0"></ol>
+        <div
+          id="widthHandle" tabindex="0"
+          class="absolute top-1/2 right-[-12px] h-12 w-3 -translate-y-1/2 cursor-ew-resize rounded-full border border-white/30 bg-white/20 transition hover:bg-accent/40 touch-none"
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label="Resize queue width"
+        ></div>
+      </div>
+
+      <div class="mt-4 flex flex-col gap-3 rounded-xl bg-black/30 p-4 backdrop-blur-sm">
+        <div class="flex flex-wrap items-center gap-3">
+          <input
+            id="songTitle"
+            type="text"
+            maxlength="120"
+            placeholder="Song title"
+            class="min-w-[140px] flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          />
+          <input
+            id="songBy"
+            type="text"
+            maxlength="30"
+            placeholder="Requested by (optional)"
+            class="min-w-[140px] flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          />
+          <button
+            id="addSongBtn"
+            type="button"
+            class="rounded-lg border border-accent bg-accent/20 px-3 py-2 font-semibold text-white transition hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          >
+            Add Song
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            id="skipBtn"
+            type="button"
+            class="rounded-lg border border-accent bg-accent/20 px-3 py-2 font-semibold text-white transition hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          >
+            Skip
+          </button>
+          <button
+            id="clearBtn"
+            type="button"
+            class="rounded-lg border border-accent bg-accent/20 px-3 py-2 font-semibold text-white transition hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          >
+            Clear
+          </button>
+          <button
+            id="queueBtn"
+            type="button"
+            class="rounded-lg border border-accent bg-accent/20 px-3 py-2 font-semibold text-white transition hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/60"
+          >
+            Announce Queue
+          </button>
+        </div>
+
+        <div
+          id="status"
+          role="status"
+          aria-live="polite"
+          class="min-h-[18px] text-sm text-accent"
+        ></div>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <section class="flex flex-wrap items-center gap-2">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-muted">Commands</h2>
+          <div id="commandToggles" class="flex flex-wrap gap-2"></div>
+        </section>
+
+        <section class="flex flex-wrap items-center gap-2">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-muted">Alignment</h2>
+          <div class="flex gap-2">
+            <button
+              data-align="left"
+              class="align-btn rounded-lg border border-white/20 bg-white/10 px-3 py-1 text-sm font-semibold transition hover:text-white focus:outline-none focus:ring-2 focus:ring-accent/60"
+            >
+              Left
+            </button>
+            <button
+              data-align="center"
+              class="align-btn rounded-lg border border-white/20 bg-white/10 px-3 py-1 text-sm font-semibold transition hover:text-white focus:outline-none focus:ring-2 focus:ring-accent/60"
+            >
+              Center
+            </button>
+            <button
+              data-align="right"
+              class="align-btn rounded-lg border border-white/20 bg-white/10 px-3 py-1 text-sm font-semibold transition hover:text-white focus:outline-none focus:ring-2 focus:ring-accent/60"
+            >
+              Right
+            </button>
+          </div>
+        </section>
+
+        <section class="flex flex-wrap items-center gap-3">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-muted">Colors</h2>
+          <label class="flex items-center gap-2 text-sm text-muted">
+            Overlay
+            <input
+              type="color"
+              data-theme-key="overlayBg"
+              value="#101827"
+              class="h-9 w-16 cursor-pointer rounded-md border border-white/20 bg-transparent p-1"
+            />
+          </label>
+          <label class="flex items-center gap-2 text-sm text-muted">
+            Queue
+            <input
+              type="color"
+              data-theme-key="queueBg"
+              value="#1f2937"
+              class="h-9 w-16 cursor-pointer rounded-md border border-white/20 bg-transparent p-1"
+            />
+          </label>
+          <label class="flex items-center gap-2 text-sm text-muted">
+            Text
+            <input
+              type="color"
+              data-theme-key="textPrimary"
+              value="#ffffff"
+              class="h-9 w-16 cursor-pointer rounded-md border border-white/20 bg-transparent p-1"
+            />
+          </label>
+          <label class="flex items-center gap-2 text-sm text-muted">
+            Accent
+            <input
+              type="color"
+              data-theme-key="textSecondary"
+              value="#b3b3b3"
+              class="h-9 w-16 cursor-pointer rounded-md border border-white/20 bg-transparent p-1"
+            />
+          </label>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/queue-shared.js"></script>
+  <script src="/js/app-shared.js"></script>
+  <script>
+    const list = document.getElementById('list')
+    const wrapper = document.getElementById('overlayWrapper')
+    const titleInput = document.getElementById('songTitle')
+    const byInput = document.getElementById('songBy')
+    const statusEl = document.getElementById('status')
+    const commandContainer = document.getElementById('commandToggles')
+    const alignmentButtons = document.querySelectorAll('.align-btn')
+    const themeInputs = document.querySelectorAll('[data-theme-key]')
+    let statusTimer
+
+    const isObsBrowser = /OBS/.test(navigator.userAgent)
+    document.body.classList.toggle('is-obs', isObsBrowser)
+
+    const socket = window.QueueApp.createSocket()
+
+    const applyTheme = (theme = {}) => {
+      const merged = { ...window.QueueApp.THEME_DEFAULTS, ...theme }
+      const overlayColor = window.QueueApp.hexToRgba(merged.overlayBg, 0.35)
+      if (wrapper) {
+        wrapper.style.backgroundColor = overlayColor
+        wrapper.style.color = merged.textPrimary
+      }
+      const heading = wrapper?.querySelector('h1')
+      if (heading) heading.style.color = merged.textPrimary
+    }
+
+    const themeManager =
+      window.QueueApp.createThemeManager({
+        socket,
+        onApply: applyTheme
+      }) || {
+        getTheme: () => ({ ...window.QueueApp.THEME_DEFAULTS }),
+        update: () => {},
+        subscribe: (fn) => {
+          if (typeof fn === 'function') fn({ ...window.QueueApp.THEME_DEFAULTS })
+          return () => {}
+        }
+      }
+
+    const alignmentControls =
+      window.QueueApp.initAlignmentControls({
+        wrapper,
+        socket,
+        buttons: alignmentButtons
+      }) || {
+        apply: () => {},
+        subscribe: (fn) => {
+          if (typeof fn === 'function') fn({ align: 'center', width: wrapper.getBoundingClientRect().width })
+          return () => {}
+        },
+        getState: () => ({ align: 'center', width: wrapper.getBoundingClientRect().width }),
+        MIN_WIDTH: 320,
+        MAX_WIDTH: 960
+      }
+
+    alignmentControls.apply(alignmentControls.getState(), { emit: false })
+    alignmentControls.subscribe(({ align }) => {
+      const heading = wrapper?.querySelector('h1')
+      if (heading) heading.style.textAlign = align
+    })
+    const headingInit = wrapper?.querySelector('h1')
+    if (headingInit) headingInit.style.textAlign = alignmentControls.getState().align
+
+    const render = window.QueueApp.createQueueRenderer({
+      listEl: list,
+      allowRemoval: true,
+      getTheme: () => themeManager.getTheme(),
+      subscribeToTheme: themeManager.subscribe,
+      getLayout: () => alignmentControls.getState(),
+      subscribeToLayout: alignmentControls.subscribe,
+      onRemove: async (index) => {
+        setStatus(`Removing song #${index}…`)
+        try {
+          await postJson('/api/queue/remove', { index })
+          setStatus(`Removed song #${index}.`)
+        } catch (err) {
+          setStatus(err.message, true)
+        }
+      }
+    })
+
+    socket.on('queue', render)
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message
+      statusEl.classList.toggle('text-rose-400', isError)
+      statusEl.classList.toggle('text-accent', !isError)
+      clearTimeout(statusTimer)
+      if (message) {
+        statusTimer = setTimeout(() => {
+          statusEl.textContent = ''
+          statusEl.classList.remove('text-rose-400')
+          statusEl.classList.add('text-accent')
+        }, 4000)
+      }
+    }
+
+    async function postJson(url, body) {
+      const options = { method: 'POST' }
+      if (body !== undefined) {
+        options.headers = { 'Content-Type': 'application/json' }
+        options.body = JSON.stringify(body)
+      }
+      const res = await fetch(url, options)
+      let data = {}
+      try {
+        data = await res.json()
+      } catch (_) {}
+      if (!res.ok) throw new Error(data.error || res.statusText)
+      return data
+    }
+
+    document.getElementById('addSongBtn').addEventListener('click', async () => {
+      const title = titleInput.value.trim()
+      const by = byInput.value.trim()
+      if (!title) {
+        setStatus('Enter a song title first.', true)
+        return
+      }
+      setStatus('Adding song…')
+      try {
+        await postJson('/api/queue', { title, by: by || undefined })
+        titleInput.value = ''
+        byInput.value = ''
+        setStatus('Song added to queue.')
+      } catch (err) {
+        setStatus(err.message, true)
+      }
+    })
+
+    document.getElementById('skipBtn').addEventListener('click', async () => {
+      setStatus('Skipping…')
+      try {
+        await postJson('/api/queue/skip', {})
+        setStatus('Skipped current song.')
+      } catch (err) {
+        setStatus(err.message, true)
+      }
+    })
+
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+      setStatus('Clearing queue…')
+      try {
+        await postJson('/api/queue/clear', {})
+        setStatus('Queue cleared.')
+      } catch (err) {
+        setStatus(err.message, true)
+      }
+    })
+
+    document.getElementById('queueBtn').addEventListener('click', async () => {
+      setStatus('Announcing queue…')
+      try {
+        await postJson('/api/queue/announce', {})
+        setStatus('Queue announced in chat.')
+      } catch (err) {
+        setStatus(err.message, true)
+      }
+    })
+
+    window.QueueApp.initCommandToggles({
+      container: commandContainer,
+      socket
+    })
+
+    window.QueueApp.initThemeControls({
+      manager: themeManager,
+      inputs: themeInputs
+    })
+
+    const widthHandle = document.getElementById('widthHandle')
+    if (widthHandle && alignmentControls) {
+      let drag = null
+
+      const startDrag = (event) => {
+        event.preventDefault()
+        drag = {
+          id: event.pointerId,
+          startX: event.clientX,
+          startWidth: alignmentControls.getState().width
+        }
+        widthHandle.setPointerCapture(event.pointerId)
+        widthHandle.classList.add('ring-2', 'ring-accent/60')
+      }
+
+      const moveDrag = (event) => {
+        if (!drag || event.pointerId !== drag.id) return
+        const delta = event.clientX - drag.startX
+        const next = Math.round(drag.startWidth + delta)
+        const clamped = Math.min(alignmentControls.MAX_WIDTH, Math.max(alignmentControls.MIN_WIDTH, next))
+        alignmentControls.apply({ width: clamped }, { emit: true })
+      }
+
+      const endDrag = (event) => {
+        if (!drag || event.pointerId !== drag.id) return
+        widthHandle.releasePointerCapture(event.pointerId)
+        widthHandle.classList.remove('ring-2', 'ring-accent/60')
+        drag = null
+      }
+
+      widthHandle.addEventListener('pointerdown', startDrag)
+      widthHandle.addEventListener('pointermove', moveDrag)
+      widthHandle.addEventListener('pointerup', endDrag)
+      widthHandle.addEventListener('pointercancel', endDrag)
+      widthHandle.setAttribute('aria-valuemin', String(alignmentControls.MIN_WIDTH))
+      widthHandle.setAttribute('aria-valuemax', String(alignmentControls.MAX_WIDTH))
+      alignmentControls.subscribe((layout) => {
+        widthHandle.setAttribute('aria-valuenow', String(layout.width))
+      })
+      widthHandle.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+        event.preventDefault()
+        const delta = event.key === 'ArrowLeft' ? -20 : 20
+        const next = alignmentControls.getState().width + delta
+        const clamped = Math.min(alignmentControls.MAX_WIDTH, Math.max(alignmentControls.MIN_WIDTH, next))
+        alignmentControls.apply({ width: clamped }, { emit: true })
+      })
+    }
+  </script>
+</body>
+</html>

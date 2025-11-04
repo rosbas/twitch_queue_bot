@@ -1,0 +1,88 @@
+<!doctype html>
+<html class="h-full bg-transparent">
+<head>
+  <meta charset="utf-8" />
+  <title>Queue Overlay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/js/tailwind-config.js"></script>
+</head>
+<body class="h-full bg-transparent font-semibold text-[20px] leading-snug text-white">
+  <main class="p-4">
+    <section id="overlayWrapper" style="width:560px" class="rounded-2xl bg-black/20 p-5 backdrop-blur-md drop-shadow-overlay">
+      <header class="mb-3">
+        <h1 class="text-2xl font-semibold text-accent">Next up</h1>
+      </header>
+
+      <ol id="list" class="space-y-0"></ol>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/queue-shared.js"></script>
+  <script src="/js/app-shared.js"></script>
+  <script>
+    const list = document.getElementById('list')
+    const wrapper = document.getElementById('overlayWrapper')
+    const socket = window.QueueApp.createSocket()
+
+    document.body.classList.add('is-obs')
+
+    const applyTheme = (theme = {}) => {
+      const merged = { ...window.QueueApp.THEME_DEFAULTS, ...theme }
+      const overlayColor = window.QueueApp.hexToRgba(merged.overlayBg, 0.35)
+      if (wrapper) {
+        wrapper.style.backgroundColor = overlayColor
+        wrapper.style.color = merged.textPrimary
+      }
+      const heading = wrapper?.querySelector('h1')
+      if (heading) {
+        heading.style.color = merged.textPrimary
+      }
+      document.body.style.color = merged.textPrimary
+    }
+
+    const themeManager =
+      window.QueueApp.createThemeManager({
+        socket,
+        onApply: applyTheme
+      }) || {
+        getTheme: () => ({ ...window.QueueApp.THEME_DEFAULTS }),
+        update: () => {},
+        subscribe: (fn) => {
+          if (typeof fn === 'function') fn({ ...window.QueueApp.THEME_DEFAULTS })
+          return () => {}
+        }
+      }
+
+    const alignmentControls =
+      window.QueueApp.initAlignmentControls({
+        wrapper,
+        socket
+      }) || {
+        apply: () => {},
+        subscribe: (fn) => {
+          if (typeof fn === 'function') fn({ align: 'center', width: wrapper.getBoundingClientRect().width })
+          return () => {}
+        },
+        getState: () => ({ align: 'center', width: wrapper.getBoundingClientRect().width })
+      }
+
+    alignmentControls.apply(alignmentControls.getState(), { emit: false })
+    alignmentControls.subscribe(({ align }) => {
+      const heading = wrapper?.querySelector('h1')
+      if (heading) heading.style.textAlign = align
+    })
+    const headingInit = wrapper?.querySelector('h1')
+    if (headingInit) headingInit.style.textAlign = alignmentControls.getState().align
+
+    const render = window.QueueApp.createQueueRenderer({
+      listEl: list,
+      getTheme: () => themeManager.getTheme(),
+      getLayout: () => alignmentControls.getState(),
+      subscribeToTheme: themeManager.subscribe,
+      subscribeToLayout: alignmentControls.subscribe
+    })
+    socket.on('queue', render)
+  </script>
+</body>
+</html>
