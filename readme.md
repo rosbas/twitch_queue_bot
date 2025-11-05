@@ -1,10 +1,13 @@
 This abomination is the work of Codex. The code is definitely not pleasant to the eyes, at least it works lmao.
 
 
+Demo
 ```
-https://twitch-queue-bot.vercel.app/
+https://twitch-queue-bot-nxjb.onrender.com/
 ```
-The app is not deploy, so none of the functionally really works. here is just to show what ui looks like.
+
+Point OBS browser source to your local port /overlay/ for display
+https://twitch-queue-bot-nxjb.onrender.com/overlay/
 
 <p align="center">
   <img src="samples/index.png" alt="Control Panel Screenshot" width="600">
