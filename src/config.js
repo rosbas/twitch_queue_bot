@@ -1,12 +1,12 @@
 export const config = {
-  port: process.env.PORT,
+  port: Number(process.env.PORT || 3000),
   twitch: {
     username: process.env.TWITCH_USERNAME,
     oauth: process.env.TWITCH_OAUTH,
     channel: process.env.TWITCH_CHANNEL
   },
   obs: {
-    url: process.env.OBS_URL,
+    url: process.env.OBS_URL || 'ws://127.0.0.1:4455',
     password: process.env.OBS_PASSWORD
   },
   youtube: {
