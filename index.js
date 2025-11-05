@@ -195,28 +195,45 @@ const commandRouter = createCommandRouter({
   commandToggleState: state.commandToggle
 })
 
-const twitchClient = createTwitchClient({
-  identity: { username: config.twitch.username, password: config.twitch.oauth },
-  channels: [config.twitch.channel],
-  onMessage: ({ client, channel, tags, msg, self }) => {
-    commandRouter({
-      platform: 'twitch',
-      channel,
-      message: msg,
-      displayName: tags['display-name'],
-      reply: (text) => client.say(channel, text),
-      isMod: Boolean(tags.mod),
-      isBroadcaster: tags.badges?.broadcaster === '1',
-      self
-    })
-  }
-})
+const hasTwitchCredentials =
+  Boolean(config.twitch.username) && Boolean(config.twitch.oauth) && Boolean(config.twitch.channel)
+let twitchClient
 
-sayTargets.push((channel, message) => {
-  const target = channel || config.twitch.channel
-  if (!target) return
-  twitchClient.say(target, message)
-})
+if (hasTwitchCredentials) {
+  twitchClient = createTwitchClient({
+    identity: { username: config.twitch.username, password: config.twitch.oauth },
+    channels: [config.twitch.channel],
+    onMessage: ({ client, channel, tags, msg, self }) => {
+      commandRouter({
+        platform: 'twitch',
+        channel,
+        message: msg,
+        displayName: tags['display-name'],
+        reply: (text) => client.say(channel, text),
+        isMod: Boolean(tags.mod),
+        isBroadcaster: tags.badges?.broadcaster === '1',
+        self
+      })
+    }
+  })
+
+  sayTargets.push((channel, message) => {
+    const target = channel || config.twitch.channel
+    if (!target) return
+    twitchClient.say(target, message)
+  })
+} else {
+  console.warn('Twitch client disabled: missing TWITCH_USERNAME/OAUTH/CHANNEL')
+  twitchClient = {
+    isEnabled: false,
+    connect: async () => {
+      console.warn('Twitch connect skipped (client disabled)')
+    },
+    say: () => {
+      console.warn('Twitch say skipped (client disabled)')
+    }
+  }
+}
 
 let youtubeClient
 const handleYoutubeMessage = (payload) => {
@@ -242,12 +259,34 @@ if (youtubeClient.isEnabled) {
   youtubeClient.start()
 }
 
-const obs = createObsClient()
+const obsEnableFlag = process.env.OBS_ENABLED
+const hasObsEnv = process.env.OBS_URL !== undefined || process.env.OBS_PASSWORD !== undefined
+const isObsEnabled = obsEnableFlag !== undefined ? obsEnableFlag.toLowerCase() !== 'false' : hasObsEnv
+const obs = isObsEnabled ? createObsClient() : null
+
+if (!isObsEnabled) {
+  console.warn('OBS client disabled: missing OBS configuration or OBS_ENABLED=false')
+}
 
 ;(async () => {
-  await twitchClient.connect()
-  await obs.connect(config.obs.url, config.obs.password)
-  console.log('Bot + OBS connected')
+  try {
+    const connected = []
+    if (hasTwitchCredentials) {
+      await twitchClient.connect()
+      console.log('Twitch client connected')
+      connected.push('twitch')
+    }
+    if (obs) {
+      await obs.connect(config.obs.url, config.obs.password)
+      console.log('OBS client connected')
+      connected.push('obs')
+    }
+    if (connected.length === 0) {
+      console.log('External services disabled: running in demo mode')
+    }
+  } catch (err) {
+    console.error('Startup failed', err)
+  }
 })()
 
 httpServer.listen(config.port, () => {
